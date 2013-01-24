@@ -12,16 +12,38 @@
 		}
 		this.closureList = {};
 		return {
-			delegate: function(type, selector, eventHandler) {
-				_delegate(this, type, selector, eventHandler);
+			bind: function(type, eventHandler, useCapture) {
+				_bind(this, type, eventHandler, useCapture);
+				return this;
 			},
-			undelegate: function(type, selector, eventHandler) {
-				_undelegate(this, type, selector, eventHandler);
+			unbind: function(type, eventHandler, useCapture) {
+				_unbind(this, type, eventHandler, useCapture);
+				return this;
+			},
+			delegate: function(type, selector, eventHandler, useCapture) {
+				_delegate(this, type, selector, eventHandler, useCapture);
+				return this;
+			},
+			undelegate: function(type, selector, eventHandler, useCapture) {
+				_undelegate(this, type, selector, eventHandler, useCapture);
+				return this;
 			}
 		};
 	};
 
-	function _closure = function() {
+	function _bind(targetList, type, eventHandler, useCapture) {
+		nativeForEach.call(targetList, function(target) {
+			target.addEventListener(type, eventHandler, useCapture);
+		});
+	}
+
+	function _unbind(targetList, type, eventHandler, useCapture) {
+		nativeForEach.call(targetList, function(target) {
+			target.removeEventListener(type, eventHandler, useCapture);
+		});
+	}
+
+	function _closure() {
 		return function(e) {
 
 		};
@@ -38,7 +60,6 @@
 		nativeForEach.call(targetList, function(target) {
 			target.addEventListener(type, closure, useCapture);
 		});
-		return this;
 	}
 
 	function _undelegate(targetList, type, selector, eventHandler, useCapture) {
@@ -46,7 +67,6 @@
 		nativeForEach.call(targetList, function(target) {
 			target.removeEventListener(type, closure, useCapture);
 		});
-		return this;
 	}
 
 	window.simpleEvent = simpleEvent;
