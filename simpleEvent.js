@@ -3,32 +3,38 @@
 
 	var nativeSlice = Array.prototype.slice;
 	var nativeForEach = Array.prototype.forEach;
+	var nativeFilter = Array.prototype.filter;
 
+	/**
+	 * @param {Array} arary
+	 */
 	var simpleEvent = function(array) {
-		var elementList = nativeSlice.call(array);
-		var i, len = elementList.length;
-		for(i = 0;i < len;i++) {
+		var elementList = nativeFilter.call(array, function(item) {
+			return !!item.nodeType
+		}, array);
+		this.length = elementList.length;
+		for(var i = 0, len = this.length;i < len;i++) {
 			this[i] = elementList[i];
 		}
 		this.closureList = {};
-		return {
-			bind: function(type, eventHandler, useCapture) {
-				_bind(this, type, eventHandler, useCapture);
-				return this;
-			},
-			unbind: function(type, eventHandler, useCapture) {
-				_unbind(this, type, eventHandler, useCapture);
-				return this;
-			},
-			delegate: function(type, selector, eventHandler, useCapture) {
-				_delegate(this, type, selector, eventHandler, useCapture);
-				return this;
-			},
-			undelegate: function(type, selector, eventHandler, useCapture) {
-				_undelegate(this, type, selector, eventHandler, useCapture);
-				return this;
-			}
-		};
+	};
+	simpleEvent.prototype = {
+		bind: function(type, eventHandler, useCapture) {
+			_bind(this, type, eventHandler, useCapture);
+			return this;
+		},
+		unbind: function(type, eventHandler, useCapture) {
+			_unbind(this, type, eventHandler, useCapture);
+			return this;
+		},
+		delegate: function(type, selector, eventHandler, useCapture) {
+			_delegate(this, type, selector, eventHandler, useCapture);
+			return this;
+		},
+		undelegate: function(type, selector, eventHandler, useCapture) {
+			_undelegate(this, type, selector, eventHandler, useCapture);
+			return this;
+		}
 	};
 
 	function _bind(targetList, type, eventHandler, useCapture) {
