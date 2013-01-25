@@ -1,6 +1,9 @@
 (function(window, undefined) {
 	"use strict";
 
+	var qsa = "querySelectorAll";
+
+	//alias
 	var nativeSlice = Array.prototype.slice;
 	var nativeForEach = Array.prototype.forEach;
 	var nativeFilter = Array.prototype.filter;
@@ -10,13 +13,12 @@
 	 */
 	var simpleEvent = function(array) {
 		var elementList = nativeFilter.call(array, function(item) {
-			return !!item.nodeType
+			return !!item.nodeType;
 		}, array);
 		this.length = elementList.length;
 		for(var i = 0, len = this.length;i < len;i++) {
 			this[i] = elementList[i];
 		}
-		this.closureList = {};
 	};
 	simpleEvent.prototype = {
 		bind: function(type, eventHandler, useCapture) {
@@ -49,28 +51,46 @@
 		});
 	}
 
-	function _closure() {
+	function _closure(parent, selector, eventHandler) {
 		return function(e) {
-
+			var children = parent[qsa](selector);
+			nativeForEach.call(children, function(child) {
+				if(e.target === child) {
+					eventHandler.call(child, e);
+					e.stopPropagation();
+				}
+			});
 		};
 	}
 
 	function _delegate(targetList, type, selector, eventHandler, useCapture) {
-		var closure = _closure();
-		if(!this.closureList.hasOwnProperty(type)) {
-			this.closureList[type] = [];
-		}
-		if(this.closureList[type].indexOf(closure) < 0) {
-			this.closureList[type].push(closure);
-		}
+		var closure = null;
 		nativeForEach.call(targetList, function(target) {
+			if(!target.closureList) {
+				target.closureList = {};
+			}
+			if(!target.closureList.hasOwnProperty(type)) {
+				target.closureList[type] = [];
+			}
+			closure = _closure(target, selector, eventHandler);
+			if(target.closureList[type].indexOf(closure) < 0) {
+				target.closureList[type].push(closure);
+			}
 			target.addEventListener(type, closure, useCapture);
 		});
 	}
 
 	function _undelegate(targetList, type, selector, eventHandler, useCapture) {
-		var closure = _closure();
+		var closure = null;
 		nativeForEach.call(targetList, function(target) {
+			if(target.closureList && target.closureList.hasOwnProperty(type)) {
+				closure = _closure(target, selector, eventHandler);
+				var idx = target.closureList[type].indexOf(closure);
+				if(idx > -1) {
+					target.removeEventListener(type, closure, useCapture);
+					target.closureList.splice(idx, 1);
+				}
+			}
 			target.removeEventListener(type, closure, useCapture);
 		});
 	}
