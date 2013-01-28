@@ -11,7 +11,7 @@
 	/**
 	 * @param {Array} arary
 	 */
-	var simpleEvent = function(array) {
+	var handle = function(array) {
 		var elementList = nativeFilter.call(array, function(item) {
 			return !!item.nodeType;
 		}, array);
@@ -21,7 +21,7 @@
 		}
 	};
 	//mapping
-	simpleEvent.prototype = {
+	handle.prototype = {
 		bind: function(type, eventHandler, useCapture) {
 			_bind(this, type, eventHandler, useCapture);
 			return this;
@@ -132,6 +132,6 @@
 		});
 	}
 
-	window.simpleEvent = simpleEvent;
+	window.handle = handle;
 
 })(window);
