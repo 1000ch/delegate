@@ -24,5 +24,5 @@ handle.js is thin wrapper of event handling.
 
 ##License
 
-Copyright [1000ch.net]  
+Copyright [1000ch.net](http://1000ch.net/)  
 Released under the MIT license  
