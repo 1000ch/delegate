@@ -9,7 +9,7 @@
 	var nativeFilter = Array.prototype.filter;
 
 	/**
-	 * @param {Array} arary
+	 * @param {Array|NodeList} arary
 	 */
 	var handle = function(array) {
 		var elementList = nativeFilter.call(array, function(item) {
