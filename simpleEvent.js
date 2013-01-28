@@ -20,6 +20,7 @@
 			this[i] = elementList[i];
 		}
 	};
+	//mapping
 	simpleEvent.prototype = {
 		bind: function(type, eventHandler, useCapture) {
 			_bind(this, type, eventHandler, useCapture);
@@ -39,18 +40,38 @@
 		}
 	};
 
+	/**
+	 * bind
+	 * @param {Array} targetList
+	 * @param {String} type
+	 * @param {Function} eventHandler
+	 * @param {Boolean} useCapture
+	 */
 	function _bind(targetList, type, eventHandler, useCapture) {
 		nativeForEach.call(targetList, function(target) {
 			target.addEventListener(type, eventHandler, useCapture);
 		});
 	}
 
+	/**
+	 * unbind
+	 * @param {Array} targetList
+	 * @param {String} type
+	 * @param {Function} eventHandler
+	 * @param {Boolean} useCapture
+	 */
 	function _unbind(targetList, type, eventHandler, useCapture) {
 		nativeForEach.call(targetList, function(target) {
 			target.removeEventListener(type, eventHandler, useCapture);
 		});
 	}
 
+	/**
+	 * closure
+	 * @param {HTMLElement} parent
+	 * @param {String} selector
+	 * @param {Function} eventHandler
+	 */
 	function _closure(parent, selector, eventHandler) {
 		return function(e) {
 			var children = parent[qsa](selector);
@@ -63,6 +84,14 @@
 		};
 	}
 
+	/**
+	 * delegate
+	 * @param {Array} targetList
+	 * @param {String} type
+	 * @param {String} selector
+	 * @param {Function} eventHandler
+	 * @param {Boolean} useCapture
+	 */
 	function _delegate(targetList, type, selector, eventHandler, useCapture) {
 		var closure = null;
 		nativeForEach.call(targetList, function(target) {
@@ -80,6 +109,14 @@
 		});
 	}
 
+	/**
+	 * undelegate
+	 * @param {Array} targetList
+	 * @param {String} type
+	 * @param {String} selector
+	 * @param {Function} eventHandler
+	 * @param {Boolean} useCapture
+	 */
 	function _undelegate(targetList, type, selector, eventHandler, useCapture) {
 		var closure = null;
 		nativeForEach.call(targetList, function(target) {
