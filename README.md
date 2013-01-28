@@ -19,6 +19,8 @@ handle.js is thin wrapper of event handling.
     bar.delegate("click", ".className", eventHandler);
     
     bar.undelegate("click", ".className", eventHandler);
+    bar.undelegate("click", ".className");
+    bar.undelegate("click");
 
 ##License
 
