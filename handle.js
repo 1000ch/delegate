@@ -84,15 +84,29 @@
 		};
 	}
 
+	function _search(array, propertyName, compareData) {
+		var data;
+		for(var i = 0, len = array.length;i < len;i++) {
+			data = array[i];
+			if(data[propertyName] == compareData) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	var CLOSURE = "closure";
+	var EVENT_HANDLER = "eventHandler";
+	var SELECTOR = "selector";
+
 	/**
 	 * delegate
 	 * @param {Array} targetList
 	 * @param {String} type
 	 * @param {String} selector
 	 * @param {Function} eventHandler
-	 * @param {Boolean} useCapture
 	 */
-	function _delegate(targetList, type, selector, eventHandler, useCapture) {
+	function _delegate(targetList, type, selector, eventHandler) {
 		var closure = null;
 		nativeForEach.call(targetList, function(target) {
 			if(!target.closureList) {
@@ -102,10 +116,14 @@
 				target.closureList[type] = [];
 			}
 			closure = _closure(target, selector, eventHandler);
-			if(target.closureList[type].indexOf(closure) < 0) {
-				target.closureList[type].push(closure);
+			if(_search(target.closureList[type], CLOSURE, closure) < 0) {
+				target.closureList[type].push({
+					selector: selector,
+					eventHandler: eventHandler,
+					closure: closure
+				});
 			}
-			target.addEventListener(type, closure, useCapture);
+			target.addEventListener(type, closure);
 		});
 	}
 
@@ -113,22 +131,34 @@
 	 * undelegate
 	 * @param {Array} targetList
 	 * @param {String} type
-	 * @param {String} selector
-	 * @param {Function} eventHandler
-	 * @param {Boolean} useCapture
+	 * @param {String*} selector
+	 * @param {Function*} eventHandler
 	 */
-	function _undelegate(targetList, type, selector, eventHandler, useCapture) {
-		var closure = null;
+	function _undelegate(targetList, type, selector, eventHandler) {
 		nativeForEach.call(targetList, function(target) {
 			if(target.closureList && target.closureList.hasOwnProperty(type)) {
-				closure = _closure(target, selector, eventHandler);
-				var idx = target.closureList[type].indexOf(closure);
-				if(idx > -1) {
-					target.removeEventListener(type, closure, useCapture);
-					target.closureList.splice(idx, 1);
+				if(type && selector && eventHandler) {
+					var array = target.closureList[type];
+					var idx = _search(array, EVENT_HANDLER, eventHandler);
+					if(idx > -1) {
+						target.removeEventListener(type, array[idx][CLOSURE]);
+						target.closureList[type].splice(idx, 1);
+					}
+				} else if(type && selector && !eventHandler) {
+					var array = target.closureList[type];
+					var idx = _search(array, SELECTOR, selector);
+					if(idx > -1) {
+						target.removeEventListener(type, array[idx][CLOSURE]);
+						target.closureList[type].splice(idx, 1);
+					}
+				} else if(type && !selector && !eventHandler) {
+					var closureList = target.closureList[type];
+					nativeForEach.call(closureList, function(closure) {
+						target.removeEventListener(type, closure);
+					});
+					delete target.closureList[type];
 				}
 			}
-			target.removeEventListener(type, closure, useCapture);
 		});
 	}
 
