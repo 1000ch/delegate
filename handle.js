@@ -84,6 +84,13 @@
 		};
 	}
 
+	/**
+	 * search item which match comparing data
+	 * at specified property from array
+	 * @param {Array} array
+	 * @param {String} propertyName
+	 * @param {Object} compareData
+	 */
 	function _search(array, propertyName, compareData) {
 		var data;
 		for(var i = 0, len = array.length;i < len;i++) {
@@ -95,6 +102,7 @@
 		return -1;
 	}
 
+	//constant
 	var CLOSURE = "closure";
 	var EVENT_HANDLER = "eventHandler";
 	var SELECTOR = "selector";
@@ -152,9 +160,9 @@
 						target.closureList[type].splice(idx, 1);
 					}
 				} else if(type && !selector && !eventHandler) {
-					var closureList = target.closureList[type];
-					nativeForEach.call(closureList, function(closure) {
-						target.removeEventListener(type, closure);
+					var itemList = target.closureList[type];
+					nativeForEach.call(itemList, function(item) {
+						target.removeEventListener(type, item[CLOSURE]);
 					});
 					delete target.closureList[type];
 				}
