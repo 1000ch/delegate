@@ -6,8 +6,8 @@ handle.js is thin wrapper of event handling.
 
 ##Usage
 
-    var foo = new handle(document.querySelectorAll("#id .className"));
-    var bar = new handle(document.querySelectorAll("#id"));
+    var foo = new Handle(document.querySelectorAll("#id .className"));
+    var bar = new Handle(document.querySelectorAll("#id"));
     var eventHandler = function() {
     	console.log("log");
     };
