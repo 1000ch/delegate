@@ -8,6 +8,7 @@
 	"use strict";
 
 	var qsa = "querySelectorAll";
+	var rxConciseSelector = /^(?:#([\w\-]+)|(\w+)|\.([\w\-]+))$/;
 
 	//alias
 	var nativeSlice = Array.prototype.slice;
@@ -78,16 +79,32 @@
 	 * @param {String} selector
 	 * @param {Function} eventHandler
 	 */
-	function _closure(parent, selector, eventHandler) {
-		return function(e) {
-			var children = parent[qsa](selector);
+	function _createClosure(parent, selector, eventHandler) {
+		var closure = function(e) {
+			var children = [];
+			var match = rxConciseSelector.exec(selector);
+			//shortcut for concise selectors
+			if(match) {
+				if(match[1]) {
+					children.push(document.getElementById(match[1]));
+				} else if(match[2]) {
+					children = document.getElementsByTagName(match[2]);
+				} else if(match[3]) {
+					children = document.getElementsByClassName(match[3]);
+				} else {
+					//unexpected case
+					children = document[qsa](selector);
+				}
+			} else {
+				children = parent[qsa](selector);
+			}
 			nativeForEach.call(children, function(child) {
 				if(e.target === child) {
 					eventHandler.call(child, e);
-					e.stopPropagation();
 				}
 			});
 		};
+		return closure;
 	}
 
 	/**
@@ -97,7 +114,7 @@
 	 * @param {String} propertyName
 	 * @param {Object} compareData
 	 */
-	function _search(array, propertyName, compareData) {
+	function _searchIndex(array, propertyName, compareData) {
 		var data;
 		for(var i = 0, len = array.length;i < len;i++) {
 			data = array[i];
@@ -129,8 +146,8 @@
 			if(!target.closureList.hasOwnProperty(type)) {
 				target.closureList[type] = [];
 			}
-			closure = _closure(target, selector, eventHandler);
-			if(_search(target.closureList[type], CLOSURE, closure) < 0) {
+			closure = _createClosure(target, selector, eventHandler);
+			if(_searchIndex(target.closureList[type], CLOSURE, closure) < 0) {
 				target.closureList[type].push({
 					selector: selector,
 					eventHandler: eventHandler,
@@ -153,14 +170,14 @@
 			if(target.closureList && target.closureList.hasOwnProperty(type)) {
 				if(type && selector && eventHandler) {
 					var array = target.closureList[type];
-					var idx = _search(array, EVENT_HANDLER, eventHandler);
+					var idx = _searchIndex(array, EVENT_HANDLER, eventHandler);
 					if(idx > -1) {
 						target.removeEventListener(type, array[idx][CLOSURE]);
 						target.closureList[type].splice(idx, 1);
 					}
 				} else if(type && selector && !eventHandler) {
 					var array = target.closureList[type];
-					var idx = _search(array, SELECTOR, selector);
+					var idx = _searchIndex(array, SELECTOR, selector);
 					if(idx > -1) {
 						target.removeEventListener(type, array[idx][CLOSURE]);
 						target.closureList[type].splice(idx, 1);
