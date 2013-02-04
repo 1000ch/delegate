@@ -18,17 +18,23 @@
 	/**
 	 * @param {Array|NodeList} arary
 	 */
-	var handle = function(array) {
-		var elementList = nativeFilter.call(array, function(item) {
-			return !!item.nodeType;
-		}, array);
+	var Handle = function(obj) {
+		var elementList = [];
+		if(obj.length != undefined) {
+			elementList = nativeFilter.call(obj, function(item) {
+				return !!item.nodeType;
+			}, obj);
+		} else if(obj.nodeType != undefined) {
+			elementList.push(array);
+		}
+		
 		this.length = elementList.length;
 		for(var i = 0, len = this.length;i < len;i++) {
 			this[i] = elementList[i];
 		}
 	};
 	//mapping
-	handle.prototype = {
+	Handle.prototype = {
 		bind: function(type, eventHandler, useCapture) {
 			_bind(this, type, eventHandler, useCapture);
 			return this;
@@ -193,6 +199,6 @@
 		});
 	}
 
-	window.handle = handle;
+	window.Handle = Handle;
 
 })(window);

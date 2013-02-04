@@ -1,0 +1,26 @@
+{
+  "name": "handle.js",
+  "version": "0.0.0",
+  "description": "======",
+  "main": "gruntfile.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.0rc7",
+    "grunt-contrib-qunit": "~0.1.0",
+    "grunt-contrib-watch": "~0.1.4",
+    "qunit": "~0.5.15"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/1000ch/handle.git"
+  },
+  "author": "1000ch",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "7a0af041eeb7c187cc0cc196e29d2cee03445f28"
+}
