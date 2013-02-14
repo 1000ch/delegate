@@ -7,6 +7,8 @@
 (function(window, undefined) {
 	"use strict";
 
+	var win = window;
+	var doc = win.document;
 	var qsa = "querySelectorAll";
 	var rxConciseSelector = /^(?:#([\w\-]+)|(\w+)|\.([\w\-]+))$/;
 
@@ -16,16 +18,16 @@
 	var nativeFilter = Array.prototype.filter;
 
 	/**
-	 * @param {Array|NodeList} arary
+	 * @param {Array|NodeList} array
 	 */
 	var Handle = function(obj) {
 		var elementList = [];
-		if(obj.length != undefined) {
+		if(obj.length !== undefined) {
 			elementList = nativeFilter.call(obj, function(item) {
 				return !!item.nodeType;
 			}, obj);
-		} else if(obj.nodeType != undefined) {
-			elementList.push(array);
+		} else if(obj.nodeType !== undefined) {
+			elementList.push(obj);
 		}
 		
 		this.length = elementList.length;
@@ -92,14 +94,14 @@
 			//shortcut for concise selectors
 			if(match) {
 				if(match[1]) {
-					children.push(document.getElementById(match[1]));
+					children.push(doc.getElementById(match[1]));
 				} else if(match[2]) {
-					children = document.getElementsByTagName(match[2]);
+					children = doc.getElementsByTagName(match[2]);
 				} else if(match[3]) {
-					children = document.getElementsByClassName(match[3]);
+					children = doc.getElementsByClassName(match[3]);
 				} else {
 					//unexpected case
-					children = document[qsa](selector);
+					children = doc[qsa](selector);
 				}
 			} else {
 				children = parent[qsa](selector);
@@ -172,21 +174,22 @@
 	 * @param {Function*} eventHandler
 	 */
 	function _undelegate(targetList, type, selector, eventHandler) {
+		var array, index;
 		nativeForEach.call(targetList, function(target) {
 			if(target.closureList && target.closureList.hasOwnProperty(type)) {
 				if(type && selector && eventHandler) {
-					var array = target.closureList[type];
-					var idx = _searchIndex(array, EVENT_HANDLER, eventHandler);
-					if(idx > -1) {
-						target.removeEventListener(type, array[idx][CLOSURE]);
-						target.closureList[type].splice(idx, 1);
+					array = target.closureList[type];
+					index = _searchIndex(array, EVENT_HANDLER, eventHandler);
+					if(index > -1) {
+						target.removeEventListener(type, array[index][CLOSURE]);
+						target.closureList[type].splice(index, 1);
 					}
 				} else if(type && selector && !eventHandler) {
-					var array = target.closureList[type];
-					var idx = _searchIndex(array, SELECTOR, selector);
-					if(idx > -1) {
-						target.removeEventListener(type, array[idx][CLOSURE]);
-						target.closureList[type].splice(idx, 1);
+					array = target.closureList[type];
+					index = _searchIndex(array, SELECTOR, selector);
+					if(index > -1) {
+						target.removeEventListener(type, array[index][CLOSURE]);
+						target.closureList[type].splice(index, 1);
 					}
 				} else if(type && !selector && !eventHandler) {
 					var itemList = target.closureList[type];
