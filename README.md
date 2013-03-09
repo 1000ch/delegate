@@ -1,7 +1,7 @@
 #handle.js
-======
 
 ##About
+
 handle.js is thin wrapper of event handling.
 
 ##Usage
