@@ -4,7 +4,7 @@ module.exports = function(grunt) {
 			all: ["./handle.js"]
 		},
 		uglify: {
-			my_target: {
+			js: {
 				files: {
 					"./handle.min.js": ["./handle.js"]
 				}
