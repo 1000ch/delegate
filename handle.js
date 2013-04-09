@@ -81,6 +81,16 @@
 		});
 	}
 
+	function _once(targetList, type, eventHandler, useCapture) {
+		nativeForEach.call(targetList, function(target) {
+			var wrapOnce = function(e) {
+				eventHandler.call(target, e);
+				target.removeEventListener(type, wrapOnce, useCapture);
+			};
+			target.addEventListener(type, wrapOnce, useCapture);
+		});
+	}
+
 	/**
 	 * closure
 	 * @param {HTMLElement} parent
