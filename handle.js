@@ -45,6 +45,10 @@
 			_unbind(this, type, eventHandler, useCapture);
 			return this;
 		},
+		once: function(type, eventHandler, useCapture) {
+			_once(this, type, eventHandler, useCapture);
+			return this;
+		},
 		delegate: function(type, selector, eventHandler, useCapture) {
 			_delegate(this, type, selector, eventHandler, useCapture);
 			return this;
@@ -81,6 +85,13 @@
 		});
 	}
 
+	/**
+	 * bind once
+	 * @param {Array} targetList
+	 * @param {String} type
+	 * @param {Function} eventHandler
+	 * @param {Boolean} useCapture
+	 */
 	function _once(targetList, type, eventHandler, useCapture) {
 		nativeForEach.call(targetList, function(target) {
 			var wrapOnce = function(e) {
