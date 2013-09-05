@@ -1,4 +1,4 @@
-module.exports (grunt) ->
+module.exports = (grunt) ->
   grunt.initConfig
     jshint:
       all: ["./src/event-expander.js"]
@@ -15,3 +15,4 @@ module.exports (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-watch"
 
   grunt.registerTask "default", "watch"
+  grunt.registerTask "build", "uglify"

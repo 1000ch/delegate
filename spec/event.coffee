@@ -39,8 +39,8 @@ describe "Event", ->
   describe "#delegate", ->
 
     spy = null
-    $element = null
     element = null
+    button = null
 
     beforeEach ->
       spy = sinon.spy()
