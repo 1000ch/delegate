@@ -1,228 +1,170 @@
 /**
- * handle.js
+ * event-expander.js
  *
- * Copyright 2012~, 1000ch<http://1000ch.net/>
+ * Copyright 1000ch<http://1000ch.net/>
  * licensed under the MIT license.
  **/
 (function(window, undefined) {
-	"use strict";
+    "use strict";
 
-	var win = window;
-	var doc = win.document;
-	var qsa = "querySelectorAll";
-	var rxConciseSelector = /^(?:#([\w\-]+)|(\w+)|\.([\w\-]+))$/;
+    var win = window;
+    var doc = win.document;
+    var rxConciseSelector = /^(?:#([\w\-]+)|(\w+)|\.([\w\-]+))$/;
 
-	//alias
-	var nativeSlice = Array.prototype.slice;
-	var nativeForEach = Array.prototype.forEach;
-	var nativeFilter = Array.prototype.filter;
+    //alias
+    var nativeSlice = Array.prototype.slice;
+    var nativeMap = Array.prototype.map;
+    var nativeForEach = Array.prototype.forEach;
 
-	/**
-	 * @param {Array|NodeList} array
-	 */
-	var Handle = function(obj) {
-		var elementList = [];
-		if(obj.length !== undefined) {
-			elementList = nativeFilter.call(obj, function(item) {
-				return !!item.nodeType;
-			}, obj);
-		} else if(obj.nodeType !== undefined) {
-			elementList.push(obj);
-		}
-		
-		this.length = elementList.length;
-		for(var i = 0, len = this.length;i < len;i++) {
-			this[i] = elementList[i];
-		}
-	};
-	//mapping
-	Handle.prototype = {
-		bind: function(type, eventHandler, useCapture) {
-			_bind(this, type, eventHandler, useCapture);
-			return this;
-		},
-		unbind: function(type, eventHandler, useCapture) {
-			_unbind(this, type, eventHandler, useCapture);
-			return this;
-		},
-		once: function(type, eventHandler, useCapture) {
-			_once(this, type, eventHandler, useCapture);
-			return this;
-		},
-		delegate: function(type, selector, eventHandler, useCapture) {
-			_delegate(this, type, selector, eventHandler, useCapture);
-			return this;
-		},
-		undelegate: function(type, selector, eventHandler, useCapture) {
-			_undelegate(this, type, selector, eventHandler, useCapture);
-			return this;
-		}
-	};
+    Node.prototype.bind = function(type, callback, useCapture) {
+        this.addEventListener(type, callback, useCapture);
+    };
+    Node.prototype.unbind = function(type, callback, useCapture) {
+        this.removeEventListener(type, callback, useCapture);
+    };
+    Node.prototype.once = function(type, callback, useCapture) {
+        once(this, type, callback, useCapture);
+    };
+    Node.prototype.delegate = function(type, selector, callback) {
+        delegate(this, type, selector, callback);
+    };
+    Node.prototype.undelegate = function(type, selector, callback) {
+        undelegate(this, type, selector, callback);
+    };
+    NodeList.prototype.bind = function(type, callback, useCapture) {
+        for(var i = 0, l = this.length;i < l;i++) {
+            this[i].addEventListener(type, callback, useCapture);
+        }
+    };
+    NodeList.prototype.unbind = function(type, callback, useCapture) {
+        for(var i = 0, l = this.length;i < l;i++) {
+            this[i].removeEventListener(type, callback, useCapture);
+        }
+    };
+    NodeList.prototype.delegate = function(type, callback, useCapture) {
+        for(var i = 0, l = this.length;i < l;i++) {
+            delegate(this[i], type, callback, useCapture);
+        }
+    };
+    NodeList.prototype.undelegate = function(type, callback, useCapture) {
+        for(var i = 0, l = this.length;i < l;i++) {
+            undelegate(this[i], type, callback, useCapture);
+        }
+    };
 
-	/**
-	 * bind
-	 * @param {Array} targetList
-	 * @param {String} type
-	 * @param {Function} eventHandler
-	 * @param {Boolean} useCapture
-	 */
-	function _bind(targetList, type, eventHandler, useCapture) {
-		nativeForEach.call(targetList, function(target) {
-			target.addEventListener(type, eventHandler, useCapture);
-		});
-	}
+    /**
+     * bind once
+     * @param {Node} target
+     * @param {String} type
+     * @param {Function} callback
+     * @param {Boolean} useCapture
+     */
+    function once(target, type, callback, useCapture) {
+        var wrapOnce = function(e) {
+            callback.call(target, e);
+            target.removeEventListener(type, wrapOnce, useCapture);
+        };
+        target.addEventListener(type, wrapOnce, useCapture);
+    }
 
-	/**
-	 * unbind
-	 * @param {Array} targetList
-	 * @param {String} type
-	 * @param {Function} eventHandler
-	 * @param {Boolean} useCapture
-	 */
-	function _unbind(targetList, type, eventHandler, useCapture) {
-		nativeForEach.call(targetList, function(target) {
-			target.removeEventListener(type, eventHandler, useCapture);
-		});
-	}
+    /**
+     *
+     * @param {Array} array
+     * @param {String} key
+     * @return {Array}
+     */
+    function pluck(array, key) {
+        return nativeMap.call(array, function(value) {
+            return value[key];
+        });
+    }
 
-	/**
-	 * bind once
-	 * @param {Array} targetList
-	 * @param {String} type
-	 * @param {Function} eventHandler
-	 * @param {Boolean} useCapture
-	 */
-	function _once(targetList, type, eventHandler, useCapture) {
-		nativeForEach.call(targetList, function(target) {
-			var wrapOnce = function(e) {
-				eventHandler.call(target, e);
-				target.removeEventListener(type, wrapOnce, useCapture);
-			};
-			target.addEventListener(type, wrapOnce, useCapture);
-		});
-	}
+    /**
+     * create callback closure
+     * @param {HTMLElement} parentNode
+     * @param {String} selector
+     * @param {Function} callback
+     */
+    function createDelegateClosure(parentNode, selector, callback) {
+        var closure = function(e) {
+            var children = parentNode.querySelectorAll(selector);
+            nativeForEach.call(children, function(child) {
+                if(child.compareDocumentPosition(e.target) === 0) {
+                    callback.call(child, e);
+                }
+            });
+        };
+        return closure;
+    }
 
-	/**
-	 * closure
-	 * @param {HTMLElement} parent
-	 * @param {String} selector
-	 * @param {Function} eventHandler
-	 */
-	function _createClosure(parent, selector, eventHandler) {
-		var closure = function(e) {
-			var children = [];
-			var match = rxConciseSelector.exec(selector);
-			//shortcut for concise selectors
-			if(match) {
-				if(match[1]) {
-					children.push(doc.getElementById(match[1]));
-				} else if(match[2]) {
-					children = doc.getElementsByTagName(match[2]);
-				} else if(match[3]) {
-					children = doc.getElementsByClassName(match[3]);
-				} else {
-					//unexpected case
-					children = doc[qsa](selector);
-				}
-			} else {
-				children = parent[qsa](selector);
-			}
-			nativeForEach.call(children, function(child) {
-				if(e.target === child) {
-					eventHandler.call(child, e);
-				}
-			});
-		};
-		return closure;
-	}
+    /**
+     * delegate
+     * @param {HTMLElement} targetNode
+     * @param {String} type
+     * @param {String} selector
+     * @param {Function} callback
+     */
+    function delegate(targetNode, type, selector, callback) {
+        if(!targetNode.eventStore) {
+            targetNode.eventStore = {};
+        }
+        if(!targetNode.eventStore.hasOwnProperty(type)) {
+            targetNode.eventStore[type] = [];
+        }
+        var closure = createDelegateClosure(targetNode, selector, callback);
+        var closures = pluck(targetNode.eventStore[type], "closure");
+        if(closures.indexOf(closure) === -1) {
+            targetNode.eventStore[type].push({
+                "selector": selector,
+                "callback": callback,
+                "closure": closure
+            });
+        }
+        targetNode.addEventListener(type, closure);
+    }
 
-	/**
-	 * search item which match comparing data
-	 * at specified property from array
-	 * @param {Array} array
-	 * @param {String} propertyName
-	 * @param {Object} compareData
-	 */
-	function _searchIndex(array, propertyName, compareData) {
-		var data;
-		for(var i = 0, len = array.length;i < len;i++) {
-			data = array[i];
-			if(data[propertyName] == compareData) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	//constant
-	var CLOSURE = "closure";
-	var EVENT_HANDLER = "eventHandler";
-	var SELECTOR = "selector";
-
-	/**
-	 * delegate
-	 * @param {Array} targetList
-	 * @param {String} type
-	 * @param {String} selector
-	 * @param {Function} eventHandler
-	 */
-	function _delegate(targetList, type, selector, eventHandler) {
-		var closure = null;
-		nativeForEach.call(targetList, function(target) {
-			if(!target.closureList) {
-				target.closureList = {};
-			}
-			if(!target.closureList.hasOwnProperty(type)) {
-				target.closureList[type] = [];
-			}
-			closure = _createClosure(target, selector, eventHandler);
-			if(_searchIndex(target.closureList[type], CLOSURE, closure) < 0) {
-				target.closureList[type].push({
-					selector: selector,
-					eventHandler: eventHandler,
-					closure: closure
-				});
-			}
-			target.addEventListener(type, closure);
-		});
-	}
-
-	/**
-	 * undelegate
-	 * @param {Array} targetList
-	 * @param {String} type
-	 * @param {String*} selector
-	 * @param {Function*} eventHandler
-	 */
-	function _undelegate(targetList, type, selector, eventHandler) {
-		var array, index;
-		nativeForEach.call(targetList, function(target) {
-			if(target.closureList && target.closureList.hasOwnProperty(type)) {
-				if(type && selector && eventHandler) {
-					array = target.closureList[type];
-					index = _searchIndex(array, EVENT_HANDLER, eventHandler);
-					if(index > -1) {
-						target.removeEventListener(type, array[index][CLOSURE]);
-						target.closureList[type].splice(index, 1);
-					}
-				} else if(type && selector && !eventHandler) {
-					array = target.closureList[type];
-					index = _searchIndex(array, SELECTOR, selector);
-					if(index > -1) {
-						target.removeEventListener(type, array[index][CLOSURE]);
-						target.closureList[type].splice(index, 1);
-					}
-				} else if(type && !selector && !eventHandler) {
-					var itemList = target.closureList[type];
-					nativeForEach.call(itemList, function(item) {
-						target.removeEventListener(type, item[CLOSURE]);
-					});
-					delete target.closureList[type];
-				}
-			}
-		});
-	}
-
-	window.Handle = Handle;
+    /**
+     * undelegate
+     * @param {HTMLElement} targetNode
+     * @param {String*} type
+     * @param {String*} selector
+     * @param {Function*} callback
+     */
+    function undelegate(targetNode, type, selector, callback) {
+        var storedData, callbacks, selectors, index;
+        if(targetNode.eventStore) {
+            if(type && selector && callback) {
+                storedData = targetNode.eventStore[type];
+                callbacks = pluck(storedData, "callback");
+                index = callbacks.indexOf(callback);
+                if(index > -1) {
+                    targetNode.removeEventListener(type, storedData[index].closure);
+                    targetNode.eventStore[type].splice(index, 1);
+                }
+            } else if(type && selector && !callback) {
+                storedData = targetNode.eventStore[type];
+                selectors = pluck(storedData, "selector");
+                index = selectors.indexOf(selector);
+                if(index > -1) {
+                    targetNode.removeEventListener(type, storedData[index].closure);
+                    targetNode.eventStore[type].splice(index, 1);
+                }
+            } else if(type && !selector && !callback) {
+                storedData = targetNode.eventStore[type];
+                nativeForEach.call(storedData, function(item) {
+                    targetNode.removeEventListener(type, item.closure);
+                });
+                delete targetNode.eventStore[type];
+            } else {
+                Object.keys(targetNode.eventStore).forEach(function(key) {
+                    storedData = targetNode.eventStore[key];
+                    nativeForEach.call(storedData, function(item) {
+                        targetNode.removeEventListener(key, item.closure);
+                    });
+                    delete targetNode.eventStore[key];
+                });
+            }
+        }
+    }
 
 })(window);
