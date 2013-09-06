@@ -16,39 +16,101 @@
     var nativeMap = Array.prototype.map;
     var nativeForEach = Array.prototype.forEach;
 
+    /**
+     * just an alias of addEventListenr
+     * @param {String} type
+     * @param {Function} callback
+     * @param {Boolean} useCapture
+     */
     Node.prototype.bind = function(type, callback, useCapture) {
         this.addEventListener(type, callback, useCapture);
     };
+
+    /**
+     * just an alias of removeEventListener
+     * @param {String} type
+     * @param {Function} callback
+     * @param {Boolean} useCapture
+     */
     Node.prototype.unbind = function(type, callback, useCapture) {
         this.removeEventListener(type, callback, useCapture);
     };
+
+    /**
+     * callback will called once
+     * @param {String} type
+     * @param {Function} callback
+     * @param {Boolean} useCapture
+     */
     Node.prototype.once = function(type, callback, useCapture) {
         once(this, type, callback, useCapture);
     };
+
+    /**
+     * delegate
+     * @param {String} type
+     * @param {String} selector
+     * @param {Function} callback
+     */
     Node.prototype.delegate = function(type, selector, callback) {
         delegate(this, type, selector, callback);
     };
+
+    /**
+     * undelegate
+     * @param {String} type
+     * @param {String} selector
+     * @param {Function} callback
+     */
     Node.prototype.undelegate = function(type, selector, callback) {
         undelegate(this, type, selector, callback);
     };
+
+    /**
+     * bind
+     * @param {String} type
+     * @param {Function} callback
+     * @param {Boolean} useCapture
+     */
     NodeList.prototype.bind = function(type, callback, useCapture) {
         for(var i = 0, l = this.length;i < l;i++) {
             this[i].addEventListener(type, callback, useCapture);
         }
     };
+
+    /**
+     * unbind
+     * @param {String} type
+     * @param {Function} callback
+     * @param {Boolean} useCapture
+     */
     NodeList.prototype.unbind = function(type, callback, useCapture) {
         for(var i = 0, l = this.length;i < l;i++) {
             this[i].removeEventListener(type, callback, useCapture);
         }
     };
-    NodeList.prototype.delegate = function(type, callback, useCapture) {
+
+    /**
+     * delegate
+     * @param {String} type
+     * @param {String} selector
+     * @param {Function} callback
+     */
+    NodeList.prototype.delegate = function(type, selector, callback) {
         for(var i = 0, l = this.length;i < l;i++) {
-            delegate(this[i], type, callback, useCapture);
+            delegate(this[i], type, selector, callback);
         }
     };
-    NodeList.prototype.undelegate = function(type, callback, useCapture) {
+
+    /**
+     * undelegate
+     * @param {String} type
+     * @param {String} selector
+     * @param {Function} callback
+     */
+    NodeList.prototype.undelegate = function(type, selector, callback) {
         for(var i = 0, l = this.length;i < l;i++) {
-            undelegate(this[i], type, callback, useCapture);
+            undelegate(this[i], type, selector, callback);
         }
     };
 
@@ -71,7 +133,7 @@
      *
      * @param {Array} array
      * @param {String} key
-     * @return {Array}
+     * @return {Array} plucked array
      */
     function pluck(array, key) {
         return nativeMap.call(array, function(value) {
