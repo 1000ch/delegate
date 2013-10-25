@@ -4,13 +4,13 @@
   "description": "Delegate event.",
   "main": "gruntfile.coffee",
   "devDependencies": {
-    "grunt": "~0.4.0",
-    "grunt-contrib-uglify": "~0.1.1",
-    "grunt-contrib-watch": "~0.2.0",
-    "grunt-contrib-jshint": "~0.1.1",
-    "qunit": "~0.5.15",
-    "testem": "~0.4.4",
-    "coffee-script": "~1.6.3"
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-jshint": "~0.7.0",
+    "testem": "~0.5.7",
+    "coffee-script": "~1.6.3",
+    "phantomjs": "~1.9.2-2"
   },
   "scripts": {
     "test": "./node_modules/testem/testem.js -l PhantomJS ci"
