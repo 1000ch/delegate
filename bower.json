@@ -1,7 +1,7 @@
 {
-  "name": "event-expander",
-  "version": "0.0.1",
-  "main": "src/event-expander.js",
+  "name": "delegate",
+  "version": "0.1.0",
+  "main": "src/delegate.js",
   "ignore": [
     "spec",
     ".*",

@@ -1,8 +1,8 @@
-# event-expander.js [![Build Status](https://travis-ci.org/1000ch/event-expander.png?branch=master)](https://travis-ci.org/1000ch/event-expander)
+# delegate.js [![Build Status](https://travis-ci.org/1000ch/delegate.png?branch=master)](https://travis-ci.org/1000ch/delegate)
 
 ## About
 
-Node expander for easy event binding.
+Delegate event.
 
 ## Usage
 

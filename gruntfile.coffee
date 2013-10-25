@@ -1,13 +1,13 @@
 module.exports = (grunt) ->
   grunt.initConfig
     jshint:
-      all: ["./src/event-expander.js"]
+      all: ["./src/delegate.js"]
     uglify:
       js:
         files:
-          "./dist/event-expander.min.js": ["./src/event-expander.js"]
+          "./dist/delegate.min.js": ["./src/delegate.js"]
     watch:
-      files: ["./src/event-expander.js"],
+      files: ["./src/delegate.js"],
       tasks: ["jshint", "uglify"]
 
   grunt.loadNpmTasks "grunt-contrib-jshint"

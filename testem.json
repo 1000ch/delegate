@@ -8,11 +8,11 @@
   "before_tests": "./node_modules/coffee-script/bin/coffee -c ./spec/*.coffee",
   "after_tests": "rm spec/*.js",
   "src_files": [
-    "./src/event-expander.js",
+    "./src/delegate.js",
     "./spec/*.coffee"
   ],
   "serve_files": [
-    "./src/event-expander.js",
+    "./src/delegate.js",
     "./spec/*.js"
   ],
   "launch_in_dev": ["PhantomJS"]
