@@ -2,25 +2,17 @@
 
 ## About
 
-Delegate event.
+Delegation abstract.
 
 ## Usage
 
 ```js
 var element = document.getElementById("hoge");
 
-element.bind("click", function(e) {
-    alert("element is clicked.");
-});
+var delegate = new Delegate(element);
 
-element.delegate("click", "span", function(e) {
+delegate.on("click", "span", function(e) {
     console.log("span of #hoge is clicked.");
-});
-
-var elements = document.getElementsByTagName("div");
-
-elements.bind("touchstart", function(e) {
-    console.log("div is touchstarted.");
 });
 ```
 
