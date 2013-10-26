@@ -18,11 +18,16 @@
 
   /**
    * base class
-   * @param elements
+   * @param obj
    * @constructor
    */
-  function Delegate(elements) {
-    this.parents = (elements.length === undefined) ? [].push(elements) : arraySlice.call(elements);
+  function Delegate(obj) {
+    this.parents = [];
+    if(obj.nodeType) {
+      this.parents.push(obj);
+    } else if(typeof obj.length === "number") {
+      this.parents = arraySlice.call(obj);
+    }
   }
 
   /**
