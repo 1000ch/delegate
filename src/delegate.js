@@ -12,8 +12,8 @@
   var rxConciseSelector = /^(?:#([\w\-]+)|(\w+)|\.([\w\-]+))$/;
 
   //alias
-  var arraySlice = Array.prototype.slice;
   var nativeMap = Array.prototype.map;
+  var nativeFilter = Array.prototype.filter;
   var nativeForEach = Array.prototype.forEach;
 
   /**
@@ -23,10 +23,12 @@
    */
   function Delegate(obj) {
     this.parents = [];
-    if(obj.nodeType) {
+    if (obj.nodeType) {
       this.parents.push(obj);
-    } else if(typeof obj.length === "number") {
-      this.parents = arraySlice.call(obj);
+    } else if (typeof obj.length === "number") {
+      this.parents = nativeFilter.call(obj, function(item) {
+        return item.nodeType;
+      });
     }
   }
 
@@ -38,7 +40,7 @@
    */
   Delegate.prototype.on = function(type, selector, callback) {
     var parents = this.parents;
-    for(var i = 0, l = parents.length;i < l;i++) {
+    for (var i = 0, l = parents.length;i < l;i++) {
       delegate(parents[i], type, selector, callback);
     }
   };
@@ -51,13 +53,13 @@
    */
   Delegate.prototype.off = function(type, selector, callback) {
     var parents = this.parents;
-    for(var i = 0, l = parents.length;i < l;i++) {
+    for (var i = 0, l = parents.length;i < l;i++) {
       undelegate(parents[i], type, selector, callback);
     }
   };
 
   /**
-   *
+   * pluck
    * @param {Array} array
    * @param {String} key
    * @return {Array} plucked array
@@ -69,6 +71,29 @@
   }
 
   /**
+   * hook of qsa
+   * @param {String} selector
+   * @param {HTMLElement} context
+   * @returns {Array|Array Like Object}
+   */
+  function qsa(selector, context) {
+    context = context || doc;
+    var m = rxConciseSelector.exec(selector);
+    if (!m) {
+      return doc.querySelectorAll(selector);
+    }
+    if (m[1]) {
+      return [doc.getElementById(m[1])];
+    } else if (m[2]) {
+      return context.getElementsByTagName(m[2]);
+    } else if (m[3]) {
+      return context.getElementsByClassName(m[3]);
+    } else {
+      return [];
+    }
+  }
+
+  /**
    * create callback closure
    * @param {HTMLElement} parentNode
    * @param {String} selector
@@ -76,9 +101,9 @@
    */
   function createDelegateClosure(parentNode, selector, callback) {
     var closure = function(e) {
-      var children = parentNode.querySelectorAll(selector);
+      var children = qsa(selector, parentNode);
       nativeForEach.call(children, function(child) {
-        if(child.compareDocumentPosition(e.target) === 0) {
+        if (child.compareDocumentPosition(e.target) === 0) {
           callback.call(child, e);
         }
       });
@@ -94,15 +119,15 @@
    * @param {Function} callback
    */
   function delegate(targetNode, type, selector, callback) {
-    if(!targetNode.eventStore) {
+    if (!targetNode.eventStore) {
       targetNode.eventStore = {};
     }
-    if(!targetNode.eventStore.hasOwnProperty(type)) {
+    if (!targetNode.eventStore.hasOwnProperty(type)) {
       targetNode.eventStore[type] = [];
     }
     var closure = createDelegateClosure(targetNode, selector, callback);
     var closures = pluck(targetNode.eventStore[type], "closure");
-    if(closures.indexOf(closure) === -1) {
+    if (closures.indexOf(closure) === -1) {
       targetNode.eventStore[type].push({
         "selector": selector,
         "callback": callback,
@@ -121,24 +146,24 @@
    */
   function undelegate(targetNode, type, selector, callback) {
     var storedData, callbacks, selectors, index;
-    if(targetNode.eventStore) {
-      if(type && selector && callback) {
+    if (targetNode.eventStore) {
+      if (type && selector && callback) {
         storedData = targetNode.eventStore[type];
         callbacks = pluck(storedData, "callback");
         index = callbacks.indexOf(callback);
-        if(index > -1) {
+        if (index > -1) {
           targetNode.removeEventListener(type, storedData[index].closure);
           targetNode.eventStore[type].splice(index, 1);
         }
-      } else if(type && selector && !callback) {
+      } else if (type && selector && !callback) {
         storedData = targetNode.eventStore[type];
         selectors = pluck(storedData, "selector");
         index = selectors.indexOf(selector);
-        if(index > -1) {
+        if (index > -1) {
           targetNode.removeEventListener(type, storedData[index].closure);
           targetNode.eventStore[type].splice(index, 1);
         }
-      } else if(type && !selector && !callback) {
+      } else if (type && !selector && !callback) {
         storedData = targetNode.eventStore[type];
         nativeForEach.call(storedData, function(item) {
           targetNode.removeEventListener(type, item.closure);
