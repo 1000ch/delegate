@@ -1,8 +1,8 @@
-# delegate.js [![Build Status](https://travis-ci.org/1000ch/delegate.png?branch=master)](https://travis-ci.org/1000ch/delegate)
+# delegate.js [![Build Status](https://travis-ci.org/1000ch/delegate.svg?branch=master)](https://travis-ci.org/1000ch/delegate)
 
 ## About
 
-Delegation abstract.
+Delegation.
 
 ## Usage
 
@@ -12,7 +12,7 @@ var element = document.getElementById("hoge");
 var delegate = new Delegate(element);
 
 delegate.on("click", "span", function(e) {
-    console.log("span of #hoge is clicked.");
+  console.log("span of #hoge is clicked.");
 });
 ```
 
